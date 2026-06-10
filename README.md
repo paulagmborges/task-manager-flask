@@ -48,7 +48,7 @@ Construída com Flask, SQLAlchemy, Flask-Login e Bootstrap.
 3. Instale as dependências da aplicação:
 
    ```bash
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 
 ## Como executar a aplicação
