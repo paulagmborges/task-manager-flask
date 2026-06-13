@@ -30,6 +30,16 @@ jobs:
       - name: Run unit tests with coverage
         run: pytest --cov-report=xml
 
+      - name: Bandit Security Scan
+        run: |
+          pip install bandit
+          bandit -r todo_project
+
+      - name: Dependency Audit
+        run: |
+          pip install pip-audit
+          pip-audit
+
       # - name: SonarQube scan
       #   uses: sonarsource/sonarqube-scan-action@v6
       #   env:
