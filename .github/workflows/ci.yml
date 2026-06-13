@@ -39,6 +39,25 @@ jobs:
         run: |
           pip install pip-audit
           pip-audit
+      
+    deploy_and_scan_stage:
+      needs: build
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Build Docker Image
+          run: docker build -t task-manager-app .
+
+        - name: Run Container in Stage
+          run: docker run -d -p 5000:5000 --name meu-app-stage task-manager-app
+
+        - name: OWASP ZAP Baseline Scan
+          run: |
+            # Aguarda alguns segundos para o Flask subir
+            sleep 5
+            docker run --rm -t zaproxy/zap-stable zap-baseline.py -t http://172.17.0.1:5000
 
       # - name: SonarQube scan
       #   uses: sonarsource/sonarqube-scan-action@v6
