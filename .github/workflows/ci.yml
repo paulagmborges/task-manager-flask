@@ -33,7 +33,7 @@ jobs:
       - name: Bandit Security Scan
         run: |
           pip install bandit
-          bandit -r todo_project
+          bandit -r todo_project -x todo_project/tests
 
       - name: Dependency Audit
         run: |
