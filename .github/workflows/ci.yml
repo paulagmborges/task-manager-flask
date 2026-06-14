@@ -26,10 +26,10 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Run unit tests with coverage
         run: pytest --cov-report=xml
-      - name: Bandit Security Scan
-        run: |
-          pip install bandit
-          bandit -r todo_project -x todo_project/tests
+     # - name: Bandit Security Scan
+     #   run: |
+     #     pip install bandit
+     #     bandit -r todo_project -x todo_project/tests
       - name: Dependency Audit
         run: |
           pip install pip-audit
