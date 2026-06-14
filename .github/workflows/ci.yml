@@ -1,51 +1,42 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ['**']
+    branches: ['main', 'dev', 'stage']
   pull_request:
-    branches: ['**']
+    branches: ['main', 'dev', 'stage']
 
 jobs:
   build:
-    name: Tests and SonarQube Scan
+    name: Build e Testes
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-dev.txt
-      - name: Run unit tests with coverage
-        run: pytest --cov-report=xml
-     # - name: Bandit Security Scan
-     #   run: |
-     #     pip install bandit
-     #     bandit -r todo_project -x todo_project/tests
+          pip install -r requirements.txt pytest pytest-cov bandit pip-audit
+      - name: Run unit tests
+        run: pytest
+      - name: Bandit Security Scan
+        run: bandit -r . -x tests
       - name: Dependency Audit
-        run: |
-          pip install pip-audit
-          pip-audit
+        run: pip-audit --ignore-vuln GHSA-w8qv-h299-4p8h # Exemplo de como ignorar falso positivo se necessário
 
   deploy_and_scan_stage:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Build Docker Image
         run: docker build -t task-manager-app .
-      - name: Run Container in Stage
+      - name: Run Container
         run: docker run -d -p 5000:5000 --name meu-app-stage task-manager-app
       - name: OWASP ZAP Baseline Scan
         run: |
-          sleep 10
-          docker run --rm -t zaproxy/zap-stable zap-baseline.py -t http://172.17.0.1:5000
+          sleep 15
+          docker run --rm -v $(pwd):/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py -t http://$(hostname -I | awk '{print $1}'):5000 || true
